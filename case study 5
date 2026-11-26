@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Online Student Service Portal</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f9;max-width:800px;margin:20px auto;padding:0 15px}
+h2{color:#0b3d91}
+.form{background:#fff;padding:18px;border-radius:8px;margin-bottom:15px;display:none}
+label{display:block;margin-top:10px;font-weight:bold}
+input,select,textarea{width:100%;padding:8px;margin-top:4px;box-sizing:border-box}
+.err{color:#c62828;font-size:13px;min-height:16px}
+.msg{padding:10px;border-radius:5px;margin:10px 0;display:none}
+.good{background:#c8e6c9;color:#1b5e20}
+.bad{background:#ffcdd2;color:#b71c1c}
+button{margin-top:12px;padding:9px 18px;background:#0b3d91;color:#fff;border:0;border-radius:4px;cursor:pointer}
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{border:1px solid #ccc;padding:8px}
+th{background:#0b3d91;color:#fff}
+</style>
+</head>
+<body>
+
+<h2>Online Student Service Portal</h2>
+
+<label for="service">Select Service</label>
+<select id="service" onchange="showForm()">
+<option value="">-- Choose --</option>
+<option value="leave">Leave Request</option>
+<option value="bonafide">Bonafide Certificate</option>
+<option value="course">Elective Course Registration</option>
+</select>
+
+<div id="msg" class="msg"></div>
+
+<form id="leave" class="form" onsubmit="return submitLeave()">
+<h3>Leave Request</h3>
+<label>Roll Number</label>
+<input id="l_roll" onkeyup="live(this,/^[A-Za-z0-9]{6,12}$/,'Enter a valid roll number')">
+<div class="err"></div>
+
+<label>Leave Type</label>
+<select id="l_type">
+<option>Medical</option>
+<option>Personal</option>
+<option>Event</option>
+</select>
+
+<label>From</label>
+<input type="date" id="l_from">
+
+<label>To</label>
+<input type="date" id="l_to">
+
+<label>Reason</label>
+<textarea id="l_reason" rows="3"></textarea>
+<div class="err" id="l_err"></div>
+<button>Submit Leave</button>
+</form>
+
+<form id="bonafide" class="form" onsubmit="return submitBonafide()">
+<h3>Bonafide Certificate</h3>
+<label>Roll Number</label>
+<input id="b_roll" onkeyup="live(this,/^[A-Za-z0-9]{6,12}$/,'Enter a valid roll number')">
+<div class="err"></div>
+
+<label>Purpose</label>
+<select id="b_purpose">
+<option>Passport</option>
+<option>Bank</option>
+<option>Scholarship</option>
+</select>
+
+<label>Number of Copies</label>
+<input type="number" id="b_copies" value="1">
+<div class="err" id="b_err"></div>
+<button>Apply</button>
+</form>
+
+<form id="course" class="form" onsubmit="return submitCourse()">
+<h3>Elective Course Registration (select up to 2)</h3>
+<div id="courseList"></div>
+
+<label>Roll Number</label>
+<input id="c_roll" onkeyup="live(this,/^[A-Za-z0-9]{6,12}$/,'Enter a valid roll number')">
+<div class="err" id="c_err"></div>
+<button>Register</button>
+</form>
+
+<h3>My Requests</h3>
+<table id="tbl">
+<thead>
+<tr><th>Ref No</th><th>Type</th><th>Details</th><th>Status</th></tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<script>
+const requests = [];
+const electives = [
+  {n:"Machine Learning",seats:2},
+  {n:"Cyber Security",seats:3},
+  {n:"Cloud Computing",seats:1},
+  {n:"IoT",seats:3}
+];
+let refNo = 1000;
+
+function renderCourses() {
+  document.getElementById("courseList").innerHTML =
+  electives.map((c,i) =>
+  `<label><input type="checkbox" name="el" value="${i}"
+  ${c.seats==0?'disabled':''} style="width:auto">
+  ${c.n} (seats left: ${c.seats})</label>`).join("");
+}
+renderCourses();
+
+function showForm() {
+  ["leave","bonafide","course"].forEach(id =>
+  document.getElementById(id).style.display = "none");
+
+  const v = document.getElementById("service").value;
+  if (v) document.getElementById(v).style.display = "block";
+}
+
+function live(el,re,msg) {
+  el.nextElementSibling.innerText = re.test(el.value) ? "" : msg;
+}
+
+function notify(text,ok) {
+  const m = document.getElementById("msg");
+  m.className = "msg " + (ok ? "good" : "bad");
+  m.innerText = text;
+  m.style.display = "block";
+}
+
+function addRequest(type,details) {
+  const r = {
+    ref:++refNo,
+    type,
+    details,
+    status:"Pending"
+  };
+  requests.push(r);
+
+  const body = document.querySelector("#tbl tbody");
+  body.innerHTML = "";
+
+  requests.forEach(x => body.innerHTML +=
+  `<tr><td>${x.ref}</td><td>${x.type}</td>
+  <td>${x.details}</td><td>${x.status}</td></tr>`);
+
+  notify("Submitted successfully. Reference No: " + r.ref,true);
+}
+
+const rollOk = v => /^[A-Za-z0-9]{6,12}$/.test(v);
+
+function submitLeave() {
+  const roll = l_roll.value.trim();
+  const from = l_from.value;
+  const to = l_to.value;
+  const reason = l_reason.value.trim();
+
+  const err = document.getElementById("l_err");
+  const today = new Date().toISOString().split("T")[0];
+
+  if (!rollOk(roll))
+    err.innerText = "Invalid roll number.";
+  else if (!from || !to)
+    err.innerText = "Select both dates.";
+  else if (from < today)
+    err.innerText = "Leave cannot start in the past.";
+  else if (to < from)
+    err.innerText = "To-date cannot be before from-date.";
+  else if (reason.length < 10)
+    err.innerText = "Reason must be at least 10 characters.";
+  else {
+    err.innerText = "";
+    addRequest("Leave",`${roll}: ${l_type.value}, ${from} to ${to}`);
+    return false;
+  }
+
+  notify("Please correct the errors.",false);
+  return false;
+}
+
+function submitBonafide() {
+  const roll = b_roll.value.trim();
+  const copies = parseInt(b_copies.value);
+  const err = document.getElementById("b_err");
+
+  if (!rollOk(roll))
+    err.innerText = "Invalid roll number.";
+  else if (isNaN(copies) || copies < 1 || copies > 5)
+    err.innerText = "Copies must be between 1 and 5.";
+  else {
+    err.innerText = "";
+    addRequest("Bonafide",
+    `${roll}: ${b_purpose.value}, ${copies} copy(ies)`);
+    return false;
+  }
+
+  notify("Please correct the errors.",false);
+  return false;
+}
+
+function submitCourse() {
+  const roll = c_roll.value.trim();
+  const err = document.getElementById("c_err");
+
+  const chosen = [...document.querySelectorAll(
+  'input[name="el"]:checked')].map(x => parseInt(x.value));
+
+  if (!rollOk(roll))
+    err.innerText = "Invalid roll number.";
+  else if (chosen.length === 0)
+    err.innerText = "Select at least one course.";
+  else if (chosen.length > 2)
+    err.innerText = "You can select at most 2 courses.";
+  else {
+    err.innerText = "";
+    chosen.forEach(i => electives[i].seats--);
+    addRequest("Course",
+    `${roll}: ` + chosen.map(i => electives[i].n).join(", "));
+    renderCourses();
+    return false;
+  }
+
+  notify("Please correct the errors.",false);
+  return false;
+}
+</script>
+</body>
+</html>
