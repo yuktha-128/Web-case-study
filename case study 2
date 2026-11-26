@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Services - MRU</title>
+<style>
+:root{--main:#0b3d91;--accent:#f57c00;--bg:#f0f4fa}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:#222}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;background:var(--main);color:#fff;padding:12px 25px}
+header nav a{color:#fff;text-decoration:none;margin-left:18px;transition:color .3s}
+header nav a:hover{color:var(--accent)}
+.hero{text-align:center;padding:70px 20px;color:#fff;background:linear-gradient(135deg,#0b3d91,#1976d2);animation:fade 1.2s ease}
+.hero h1{font-size:2.4rem;margin:0 0 10px}
+.hero a{display:inline-block;margin-top:15px;padding:12px 28px;background:var(--accent);color:#fff;border-radius:30px;text-decoration:none;transition:transform .3s}
+.hero a:hover{transform:scale(1.08)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px;max-width:1100px;margin:40px auto;padding:0 20px}
+.card{background:#fff;padding:25px;border-radius:12px;text-align:center;border:1px solid #dde;box-shadow:0 2px 6px rgba(0,0,0,.08);transition:transform .3s,box-shadow .3s}
+.card:hover{transform:translateY(-8px);box-shadow:0 10px 20px rgba(0,0,0,.18)}
+.card .icon{font-size:42px}
+.card h3{color:var(--main);margin:10px 0}
+.card a{color:var(--accent);font-weight:bold;text-decoration:none}
+footer{background:#082a66;color:#fff;text-align:center;padding:18px;margin-top:30px}
+@keyframes fade{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}
+@media(max-width:600px){
+header{flex-direction:column}
+header nav a{margin:6px 8px;display:inline-block}
+.hero h1{font-size:1.7rem}
+}
+</style>
+</head>
+<body>
+<header>
+<h2>MRU Student Services</h2>
+<nav>
+<a href="#">Home</a>
+<a href="#services">Services</a>
+<a href="#">Contact</a>
+</nav>
+</header>
+
+<section class="hero">
+<h1>Everything a Student Needs, in One Place</h1>
+<p>Quick access to library, transport, hostel, placements and examinations.</p>
+<a href="#services">Explore Services</a>
+</section>
+
+<section class="grid" id="services">
+<div class="card">
+<div class="icon">📚</div>
+<h3>Library</h3>
+<p>Catalogue, e-books and timings.</p>
+<a href="#">Open</a>
+</div>
+
+<div class="card">
+<div class="icon">🚌</div>
+<h3>Transport</h3>
+<p>Bus routes and schedules.</p>
+<a href="#">Open</a>
+</div>
+
+<div class="card">
+<div class="icon">🏠</div>
+<h3>Hostel</h3>
+<p>Rules, allotment and mess menu.</p>
+<a href="#">Open</a>
+</div>
+
+<div class="card">
+<div class="icon">💼</div>
+<h3>Placements</h3>
+<p>Drives, training and results.</p>
+<a href="#">Open</a>
+</div>
+
+<div class="card">
+<div class="icon">📝</div>
+<h3>Examinations</h3>
+<p>Timetables, hall tickets, results.</p>
+<a href="#">Open</a>
+</div>
+
+<div class="card">
+<div class="icon">❓</div>
+<h3>Helpdesk</h3>
+<p>Raise queries and get support.</p>
+<a href="#">Open</a>
+</div>
+</section>
+
+<footer>
+&copy; 2026 Malla Reddy University | studentservices@mru.edu.in
+</footer>
+</body>
+</html>
