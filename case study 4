@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exam Eligibility Checker</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:900px;margin:20px auto;padding:0 15px;background:#f4f6f9}
+h2{color:#0b3d91}
+.box{background:#fff;padding:15px;border-radius:8px;margin-bottom:15px}
+input,select{padding:8px;margin:4px 6px 4px 0}
+button{padding:9px 16px;border:0;border-radius:4px;color:#fff;background:#0b3d91;cursor:pointer}
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{border:1px solid #ccc;padding:8px;text-align:center}
+th{background:#0b3d91;color:#fff}
+.ok{background:#c8e6c9}
+.cond{background:#ffe0b2}
+.no{background:#ffcdd2}
+#err{color:red}
+</style>
+</head>
+<body>
+<h2>Attendance / Exam Eligibility Checker</h2>
+
+<div class="box">
+<input id="name" placeholder="Student name">
+<input id="roll" placeholder="Roll number">
+<input id="att" type="number" placeholder="Attendance %">
+<input id="marks" type="number" placeholder="Internal marks %">
+
+<select id="exam">
+<option>Minor-1</option>
+<option>Minor-2</option>
+<option>Endterm</option>
+</select>
+
+<button onclick="addStudent()">Add Student</button>
+<button onclick="showResults()">Check Eligibility</button>
+<p id="err"></p>
+</div>
+
+<div id="summary"></div>
+
+<table id="tbl">
+<thead>
+<tr>
+<th>Roll No</th><th>Name</th><th>Exam</th>
+<th>Attendance</th><th>Marks</th><th>Status</th><th>Reason</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<script>
+const students = [];
+const ELIGIBLE = 75, CONDONATION = 65, MIN_MARKS = 40;
+
+function addStudent() {
+  const name = document.getElementById("name").value.trim();
+  const roll = document.getElementById("roll").value.trim();
+  const att = parseFloat(document.getElementById("att").value);
+  const marks = parseFloat(document.getElementById("marks").value);
+  const exam = document.getElementById("exam").value;
+  const err = document.getElementById("err");
+
+  if (!name || !roll || isNaN(att) || isNaN(marks)) {
+    err.innerText = "Fill in all fields.";
+    return;
+  }
+  if (att < 0 || att > 100 || marks < 0 || marks > 100) {
+    err.innerText = "Values must be between 0 and 100.";
+    return;
+  }
+  if (students.some(s => s.roll === roll && s.exam === exam)) {
+    err.innerText = "Record already exists for this roll number and exam.";
+    return;
+  }
+
+  err.innerText = "";
+  students.push({name, roll, att, marks, exam});
+  showResults();
+}
+
+function checkEligibility(s) {
+  let needMarks;
+
+  switch (s.exam) {
+    case "Minor-1": needMarks = 0; break;
+    case "Minor-2": needMarks = 0; break;
+    case "Endterm": needMarks = MIN_MARKS; break;
+  }
+
+  if (s.att >= ELIGIBLE && s.marks >= needMarks)
+    return ["Eligible","ok","Meets attendance" +
+    (needMarks ? " and marks" : "") + " criteria"];
+
+  if (s.att >= ELIGIBLE)
+    return ["Not Eligible","no","Internal marks below " + MIN_MARKS + "%"];
+
+  if (s.att >= CONDONATION && s.marks >= needMarks)
+    return ["Condonation","cond","Attendance between " +
+    CONDONATION + "% and " + ELIGIBLE + "%"];
+
+  return ["Not Eligible","no","Attendance below " + CONDONATION + "%"];
+}
+
+function showResults() {
+  const body = document.querySelector("#tbl tbody");
+  body.innerHTML = "";
+
+  let e = 0, c = 0, n = 0;
+
+  for (let i = 0; i < students.length; i++) {
+    const s = students[i];
+    const [status, cls, reason] = checkEligibility(s);
+
+    if (status === "Eligible") e++;
+    else if (status === "Condonation") c++;
+    else n++;
+
+    body.innerHTML += `<tr class="${cls}">
+    <td>${s.roll}</td>
+    <td>${s.name}</td>
+    <td>${s.exam}</td>
+    <td>${s.att}%</td>
+    <td>${s.marks}%</td>
+    <td><b>${status}</b></td>
+    <td>${reason}</td>
+    </tr>`;
+  }
+
+  document.getElementById("summary").innerHTML =
+  `<div class="box"><b>Total:</b> ${students.length} |
+  <b>Eligible:</b> ${e} |
+  <b>Condonation:</b> ${c} |
+  <b>Not Eligible:</b> ${n}</div>`;
+}
+</script>
+</body>
+</html>
